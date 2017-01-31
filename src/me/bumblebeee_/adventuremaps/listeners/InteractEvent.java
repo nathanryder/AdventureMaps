@@ -1,6 +1,7 @@
 package me.bumblebeee_.adventuremaps.listeners;
 
 import me.bumblebeee_.adventuremaps.AdventureMap;
+import me.bumblebeee_.adventuremaps.MapManager;
 import me.bumblebeee_.adventuremaps.Messages;
 import me.bumblebeee_.adventuremaps.PlayerStorage;
 import org.bukkit.ChatColor;
@@ -16,6 +17,7 @@ public class InteractEvent implements Listener {
 
     PlayerStorage ps = new PlayerStorage();
     Messages m = new Messages();
+    MapManager mm = new MapManager();
 
     @EventHandler
     public void onInteractEvent(PlayerInteractEvent e) {
@@ -42,6 +44,16 @@ public class InteractEvent implements Listener {
             AdventureMap map = new AdventureMap(arena, "single");
             if (!map.verify()) {
                 p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cFailed! Please make sure the map is fully set up!"));
+                return;
+            }
+
+            int limit = mm.getLimit(map.getName());
+            int amount = 0;
+            if (MapManager.amounts.containsKey(map.getName())) {
+                amount = MapManager.amounts.get(map.getName());
+            }
+            if (limit != 0 && amount >= limit) {
+                p.sendMessage(m.getMessage("limitReached"));
                 return;
             }
 

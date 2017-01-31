@@ -47,6 +47,13 @@ public class Messages {
         createMessage("failedToSetup", "&cFailed to set map as ready!");
         createMessage("setupSuccess", "&aSuccessfully setup map!");
         createMessage("waitWhileLoading", "&aPlease wait while a map is loaded..");
+        createMessage("limitReached", "&cThere are too many maps running, please wait..");
+        createMessage("limitSuccessSet", "&aSuccessfully set map limit!");
+        createMessage("timeSuccessSet", "&aSuccessfully set time limit!");
+        createMessage("noMapsFound", "&cThere is no maps yet!");
+        createMessage("foundMaps", "&6The follow maps exists:");
+        createMessage("mapsFound", "&6%name%");
+        createMessage("helpMessage", "&6%cmd%&f: %usage%");
     }
 
     public String getMessage(String key) {

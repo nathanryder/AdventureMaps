@@ -2,6 +2,8 @@ package me.bumblebeee_.adventuremaps;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.block.Sign;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -11,12 +13,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class MapManager {
 
     static File f;
     static YamlConfiguration c;
     public static HashMap<Player, AdventureMap> players = new HashMap<>();
+    public static HashMap<String, Integer> amounts = new HashMap<>();
+    public static ArrayList<Sign> signs = new ArrayList<>();
 
     public void createMap(String name) {
         c.set("maps." + name.toLowerCase() + ".name", name);
@@ -45,6 +50,13 @@ public class MapManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Set<String> getAllMaps() {
+        ConfigurationSection cs = c.getConfigurationSection("maps");
+        if (cs == null)
+            return null;
+        return cs.getKeys(false);
     }
 
     public void setEndPoint(String name, Location l1, Location l2) {
@@ -143,10 +155,11 @@ public class MapManager {
         return false;
     }
 
-    public boolean setReady(String name) {
-        if (isReady(name))
-            return true;
+    public void setSignStatus(Sign s, String status) {
+        s.setLine(3, ChatColor.translateAlternateColorCodes('&', status));
+    }
 
+    public boolean setReady(String name) {
         name = name.toLowerCase();
         String n = c.getString("maps." + name + ".name");
         int spawnX = c.getInt("maps." + name + ".spawn.x");
@@ -164,6 +177,28 @@ public class MapManager {
             e.printStackTrace();
         }
         return true;
+    }
+
+    public void setLimit(String name, int amount) {
+        c.set("maps." + name.toLowerCase() + ".limit", amount);
+        try {
+            c.save(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setTimeLimit(String name, int amount) {
+        c.set("maps." + name.toLowerCase() + ".timeLimit", amount);
+        try {
+            c.save(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Integer getLimit(String name) {
+        return  c.getInt("maps." + name.toLowerCase() + ".limit");
     }
 
     public boolean isReady(String name) {
@@ -187,5 +222,4 @@ public class MapManager {
         MapManager.f = f;
         MapManager.c = c;
     }
-
 }

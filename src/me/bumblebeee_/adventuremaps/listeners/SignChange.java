@@ -1,6 +1,8 @@
 package me.bumblebeee_.adventuremaps.listeners;
 
+import me.bumblebeee_.adventuremaps.MapManager;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
@@ -20,6 +22,7 @@ public class SignChange implements Listener {
         e.setLine(1, ChatColor.RED + e.getLine(1));
         e.setLine(2, ChatColor.GREEN + e.getLine(2));
         e.setLine(3, ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "<Click to join!>");
+        MapManager.signs.add((Sign) e.getBlock().getState());
     }
 
 }

@@ -19,7 +19,7 @@ public class MoveEvent implements Listener {
             Location l1 = map.getEndPointOne();
             Location l2 = map.getEndPointTwo();
             if (isInside(p.getLocation(), l1, l2)) {
-                map.end();
+                map.end(true);
             }
         }
     }

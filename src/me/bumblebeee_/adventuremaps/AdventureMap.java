@@ -2,6 +2,7 @@ package me.bumblebeee_.adventuremaps;
 
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
+import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -45,23 +46,101 @@ public class AdventureMap {
     }
 
     public void start() {
-        //TODO change
         for (Player p : players) {
-            p.sendTitle("Change", "Me", 20, 40, 20);
+            String title = ChatColor.translateAlternateColorCodes('&', Maps.getInstance().getConfig().getString("startTitle.title"));
+            String subtitle = ChatColor.translateAlternateColorCodes('&', Maps.getInstance().getConfig().getString("startTitle.subtitle"));
+            p.sendTitle(title, subtitle, 20, 40, 20);
+        }
+
+        if (MapManager.amounts.containsKey(name)) {
+            int amount = MapManager.amounts.get(name);
+            MapManager.amounts.remove(name);
+            MapManager.amounts.put(name, amount+1);
+        } else {
+            MapManager.amounts.put(name, 1);
+        }
+
+        for (Sign s : MapManager.signs) {
+            int limit = mm.getLimit(name);
+            int amount = 0;
+            if (MapManager.amounts.containsKey(name)) {
+                amount = MapManager.amounts.get(name);
+            }
+
+            if (s.getLine(2).equalsIgnoreCase(name)) {
+                if (s.getLine(1).contains(type)) {
+                    if (amount >= limit) {
+                        mm.setSignStatus(s, "&b&lMap Limit Reached!");
+                    }
+                }
+            }
+        }
+
+        int time = c.getInt("maps." + name.toLowerCase() + ".timeLimit");
+        if (time != 0) {
+            startTimer(time);
         }
     }
 
-    public void end() {
+    public void end(boolean reward) {
         for (Player p : players) {
+            p.getInventory().clear();
             ps.loadPlayer(p);
-            p.sendTitle("Change", "Me", 20, 40, 20);
+            String title = ChatColor.translateAlternateColorCodes('&', Maps.getInstance().getConfig().getString("endTitle.title"));
+            String subtitle = ChatColor.translateAlternateColorCodes('&', Maps.getInstance().getConfig().getString("endTitle.subtitle"));
+            p.sendTitle(title, subtitle, 20, 40, 20);
         }
-        players.clear();
-        List<String> rewards = mm.getRewards(name);
-        for (String cmd : rewards) {
-            Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
+        if (reward) {
+            List<String> rewards = mm.getRewards(name);
+            for (String cmd : rewards) {
+                if (cmd.contains("%player%")) {
+                    for (Player p : players) {
+                        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd.replace("%player%", p.getName()));
+                    }
+                } else {
+                    Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
+                }
+            }
         }
 
+        players.clear();
+        cleanup();
+
+        if (MapManager.amounts.containsKey(name)) {
+            int amount = MapManager.amounts.get(name);
+            MapManager.amounts.remove(name);
+            if (amount > 1) {
+                MapManager.amounts.put(name, amount-1);
+            }
+        }
+
+        for (Sign s : MapManager.signs) {
+            int limit = mm.getLimit(name);
+            int amount = 0;
+            if (MapManager.amounts.containsKey(name)) {
+                amount = MapManager.amounts.get(name);
+            }
+
+            if (s.getLine(2).equalsIgnoreCase(name)) {
+                if (s.getLine(1).contains(type)) {
+                    if (amount < limit) {
+                        mm.setSignStatus(s, "&b&l<Click to join!>");
+                    }
+                }
+            }
+        }
+    }
+
+    public void startTimer(final int time) {
+        Bukkit.getServer().getScheduler().runTaskLater(Maps.getInstance(), new Runnable() {
+            @Override
+            public void run() {
+                end(false);
+            }
+        }, time*1200);
+    }
+
+    public void cleanup() {
         for (Player p : w.getPlayers())
             p.performCommand("spawn");
         Bukkit.getServer().unloadWorld(w, false);
@@ -72,6 +151,7 @@ public class AdventureMap {
                 MapManager.players.remove(p);
             }
         }
+        MapManager.amounts.remove(name);
     }
 
     private void deleteMap(File dir) {
@@ -86,6 +166,16 @@ public class AdventureMap {
             }
         }
         dir.delete();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getName() { return name; }
+
+    public List<Player> getPlayers() {
+        return players;
     }
 
     public boolean verify() {

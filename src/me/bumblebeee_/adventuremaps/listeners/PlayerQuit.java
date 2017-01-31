@@ -1,5 +1,6 @@
 package me.bumblebeee_.adventuremaps.listeners;
 
+import me.bumblebeee_.adventuremaps.AdventureMap;
 import me.bumblebeee_.adventuremaps.MapManager;
 import me.bumblebeee_.adventuremaps.PlayerStorage;
 import org.bukkit.entity.Player;
@@ -17,12 +18,25 @@ public class PlayerQuit implements Listener {
         Player p = e.getPlayer();
         p.getInventory().setContents(PlayerStorage.invs.get(p.getUniqueId()));
         p.teleport(PlayerStorage.locs.get(p.getUniqueId()));
+        AdventureMap map = MapManager.players.get(p);
         PlayerStorage.invs.remove(p.getUniqueId());
         PlayerStorage.locs.remove(p.getUniqueId());
         MapManager.players.remove(p);
 
-        //THIS IS WHAT WE WANT TO DO NEXT
-        //TODO clean up map - Remember it might be multiplayer
+        if (map.getType().equalsIgnoreCase("single")) {
+            map.cleanup();
+        } else {
+            for (Player t : map.getPlayers()) {
+                if (!t.isOnline())
+                    continue;
+                t.getInventory().setContents(PlayerStorage.invs.get(t.getUniqueId()));
+                t.teleport(PlayerStorage.locs.get(t.getUniqueId()));
+                PlayerStorage.invs.remove(t.getUniqueId());
+                PlayerStorage.locs.remove(t.getUniqueId());
+                MapManager.players.remove(t);
+            }
+            map.cleanup();
+        }
     }
 
 }

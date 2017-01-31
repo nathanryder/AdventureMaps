@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class Maps extends JavaPlugin {
@@ -23,7 +24,12 @@ public class Maps extends JavaPlugin {
     Messages m = new Messages();
     MapManager map = new MapManager();
 
+    public static HashMap<String, String> cmds = new HashMap<>();
     private static Plugin instance;
+
+    //TODO
+    //multiplayer
+    //last line of sign show min/max
 
     @Override
     public void onEnable() {
@@ -31,6 +37,17 @@ public class Maps extends JavaPlugin {
         setupFiles();
         registerAll.register();
         Bukkit.getServer().getPluginCommand("maps").setExecutor(new MainCommand());
+        cmds.put("/maps help", "Shows all commands.");
+        cmds.put("/maps list", "Shows all existing maps.");
+        cmds.put("/maps create <name>", "Create a map.");
+        cmds.put("/maps setspawn <name>", "Set a maps spawn.");
+        cmds.put("/maps addreward <name> <command>", "Add a reward to a map.");
+        cmds.put("/maps delreward <name> <command>", "Delete a reward from a map.");
+        cmds.put("/maps setend <name>", "Set the end region of a map.");
+        cmds.put("/maps setmap <name>", "Set the main folder for a map.");
+        cmds.put("/maps setlimit <name>", "Set the amount limit for a map.");
+        cmds.put("/maps ready <name>", "Check if map is ready to be played.");
+        cmds.put("/maps settime <minutes>", "Set a time limit for a map.");
     }
 
     @Override
@@ -40,12 +57,24 @@ public class Maps extends JavaPlugin {
                 continue;
             storePlayerForLater(p);
         }
-        //TODO Clean up
+        for (AdventureMap map : MapManager.players.values()) {
+            for (Player t : map.getPlayers()) {
+                if (!t.isOnline())
+                    continue;
+                t.getInventory().setContents(PlayerStorage.invs.get(t.getUniqueId()));
+                t.teleport(PlayerStorage.locs.get(t.getUniqueId()));
+                PlayerStorage.invs.remove(t.getUniqueId());
+                PlayerStorage.locs.remove(t.getUniqueId());
+                MapManager.players.remove(t);
+            }
+            map.cleanup();
+        }
     }
 
     public void setupFiles() {
         m.setup();
         map.setup();
+        saveDefaultConfig();
     }
 
     public static Plugin getInstance() {
