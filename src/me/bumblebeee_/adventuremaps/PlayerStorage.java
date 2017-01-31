@@ -17,17 +17,18 @@ public class PlayerStorage {
             locs.remove(p.getUniqueId());
 
         locs.put(p.getUniqueId(), p.getLocation());
-        invs.put(p.getUniqueId(), p.getInventory().getContents());
+        if (p.getInventory().getContents() != null) {
+            invs.put(p.getUniqueId(), p.getInventory().getContents());
+        }
     }
 
     public boolean loadPlayer(Player p) {
         if (!locs.containsKey(p.getUniqueId()))
             return false;
-        if (!invs.containsKey(p.getUniqueId()))
-            return false;
 
         p.teleport(locs.get(p.getUniqueId()));
-        p.getInventory().setContents(invs.get(p.getUniqueId()));
+        if (invs.get(p.getUniqueId()) != null)
+            p.getInventory().setContents(invs.get(p.getUniqueId()));
         return true;
     }
 

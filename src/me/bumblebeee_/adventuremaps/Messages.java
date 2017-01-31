@@ -53,6 +53,9 @@ public class Messages {
         createMessage("noMapsFound", "&cThere is no maps yet!");
         createMessage("foundMaps", "&6The follow maps exists:");
         createMessage("mapsFound", "&6%name%");
+        createMessage("playerLimitSuccessSet", "&aSuccessfully set player limit!");
+        createMessage("alreadyIngame", "&cYou are already in a game!");
+        createMessage("waitForOtherPlayers", "&6Please wait for other players to join..");
         createMessage("helpMessage", "&6%cmd%&f: %usage%");
     }
 

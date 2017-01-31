@@ -276,13 +276,13 @@ public class MainCommand implements CommandExecutor {
                     return true;
                 }
             } else if (args[0].equalsIgnoreCase("settime")) {
-                if (!sender.hasPermission("maps.setlimit")) {
+                if (!sender.hasPermission("maps.settime")) {
                     sender.sendMessage(m.getMessage("noPermissions"));
                     return false;
                 }
 
                 if (!(args.length > 2)) {
-                    sender.sendMessage(m.getMessage("invalidArgs").replace("%usage%", "/maps settime <name> <minutes>"));
+                    sender.sendMessage(m.getMessage("invalidArgs").replace("%usage%", "/maps setlimit <name> <minutes>"));
                     return false;
                 }
 
@@ -302,6 +302,34 @@ public class MainCommand implements CommandExecutor {
 
                 map.setTimeLimit(name, amount);
                 sender.sendMessage(m.getMessage("timeSuccessSet"));
+                return true;
+            } else if (args[0].equalsIgnoreCase("setplayerlimit")) {
+                if (!sender.hasPermission("maps.setplayerlimit")) {
+                    sender.sendMessage(m.getMessage("noPermissions"));
+                    return false;
+                }
+
+                if (!(args.length > 2)) {
+                    sender.sendMessage(m.getMessage("invalidArgs").replace("%usage%", "/maps setplayerlimit <name> <limit>"));
+                    return false;
+                }
+
+                String name = args[1];
+                int amount;
+                try {
+                    amount = Integer.parseInt(args[2]);
+                } catch (Exception e) {
+                    sender.sendMessage(ChatColor.RED + args[2] + " is not a number!");
+                    return false;
+                }
+
+                if (!map.mapExists(name)) {
+                    sender.sendMessage(m.getMessage("mapNotExists").replace("%name%", name));
+                    return false;
+                }
+
+                map.setPlayerLimit(name, amount);
+                sender.sendMessage(m.getMessage("playerLimitSuccessSet"));
                 return true;
             } else {
                 sender.sendMessage(m.getMessage("invalidArgs").replace("%usage%", "/maps help"));

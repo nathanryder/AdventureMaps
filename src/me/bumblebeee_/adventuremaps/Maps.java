@@ -28,8 +28,10 @@ public class Maps extends JavaPlugin {
     private static Plugin instance;
 
     //TODO
-    //multiplayer
-    //last line of sign show min/max
+    //Messages to say wait for players with a option to leave
+    //Disabled commands
+    //Checkpoints
+    //Permissions
 
     @Override
     public void onEnable() {

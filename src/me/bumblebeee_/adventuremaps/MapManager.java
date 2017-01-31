@@ -22,6 +22,7 @@ public class MapManager {
     public static HashMap<Player, AdventureMap> players = new HashMap<>();
     public static HashMap<String, Integer> amounts = new HashMap<>();
     public static ArrayList<Sign> signs = new ArrayList<>();
+    public static ArrayList<AdventureMap> waiting = new ArrayList<>();
 
     public void createMap(String name) {
         c.set("maps." + name.toLowerCase() + ".name", name);
@@ -157,6 +158,7 @@ public class MapManager {
 
     public void setSignStatus(Sign s, String status) {
         s.setLine(3, ChatColor.translateAlternateColorCodes('&', status));
+        s.update();
     }
 
     public boolean setReady(String name) {
@@ -221,5 +223,14 @@ public class MapManager {
 
         MapManager.f = f;
         MapManager.c = c;
+    }
+
+    public void setPlayerLimit(String name, int amount) {
+        c.set("maps." + name.toLowerCase() + ".playerLimit", amount);
+        try {
+            c.save(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

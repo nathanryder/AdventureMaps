@@ -5,11 +5,14 @@ import org.bukkit.*;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class AdventureMap {
@@ -30,6 +33,9 @@ public class AdventureMap {
     File mapCOPY;
     World w;
 
+    int playing = 0;
+    int playerLimit;
+
     public AdventureMap(String arena, String type) {
         this.name = ChatColor.stripColor(arena);
         this.type = type;
@@ -43,6 +49,11 @@ public class AdventureMap {
         }
         this.f = f;
         this.c = YamlConfiguration.loadConfiguration(f);
+
+        if (type.equalsIgnoreCase("multi")) {
+            playerLimit = c.getInt("maps." + name.toLowerCase() + ".playerLimit");
+            MapManager.waiting.add(this);
+        }
     }
 
     public void start() {
@@ -146,8 +157,9 @@ public class AdventureMap {
         Bukkit.getServer().unloadWorld(w, false);
         deleteMap(w.getWorldFolder());
 
-        for (Player p : MapManager.players.keySet()) {
-            if (MapManager.players.get(p) == this) {
+        HashMap<Player, AdventureMap> iterator = (HashMap<Player, AdventureMap>) MapManager.players.clone();
+        for (Player p : iterator.keySet()) {
+            if (iterator.get(p) == this) {
                 MapManager.players.remove(p);
             }
         }
@@ -216,7 +228,26 @@ public class AdventureMap {
         if (type.contains("single")) {
             teleportToSpawn(p);
             start();
+        } else {
+            playing++;
+            if (playing == playerLimit) {
+                for (Player t : players) {
+                    teleportToSpawn(t);
+                }
+                start();
+                MapManager.waiting.remove(this);
+            }
         }
+
+        ItemStack leave = new ItemStack(Material.BARRIER);
+        ItemMeta lm = leave.getItemMeta();
+        lm.setDisplayName(ChatColor.RED + "Leave");
+        leave.setItemMeta(lm);
+        p.getInventory().setItem(8, leave);
+    }
+
+    public void setPlaying(int playing) {
+        this.playing = playing;
     }
 
     public void teleportToSpawn(Player p) {
@@ -242,6 +273,10 @@ public class AdventureMap {
         int z2 = c.getInt("maps." + name.toLowerCase() + ".end.two.z");
         return new Location(w, x2, y2, z2);
     }
+
+    public int getPlaying() { return playing; }
+
+    public int getPlayerLimit() { return playerLimit; }
 
 
     String randomString( int len ){
