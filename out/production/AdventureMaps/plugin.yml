@@ -1,8 +1,0 @@
-name: AdventureMaps
-main: me.bumblebeee_.adventuremaps.Maps
-version: 1.0
-author: BumbleBeee_
-commands:
-  maps:
-    aliases: [map]
-    description: Main command
